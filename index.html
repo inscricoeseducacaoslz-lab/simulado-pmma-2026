@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simulado PMMA 2026</title>
+
+<style>
+*{box-sizing:border-box}
+body{
+    margin:0;
+    font-family:Arial,sans-serif;
+    background:#f2f4f7;
+    color:#172033;
+}
+.topo{
+    background:#111827;
+    color:white;
+    padding:22px 15px;
+    text-align:center;
+}
+.topo h1{margin:0;font-size:25px}
+.topo p{margin:7px 0 0;color:#d1d5db}
+
+.container{
+    max-width:700px;
+    margin:25px auto;
+    padding:15px;
+}
+.card{
+    background:white;
+    border-radius:16px;
+    padding:25px;
+    box-shadow:0 4px 18px rgba(0,0,0,.10);
+}
+.info{
+    display:flex;
+    justify-content:space-between;
+    gap:10px;
+    margin-bottom:20px;
+    font-weight:bold;
+}
+.materia{
+    display:inline-block;
+    background:#e8eefc;
+    color:#1d4ed8;
+    padding:7px 12px;
+    border-radius:20px;
+    font-size:14px;
+    margin-bottom:15px;
+}
+.pergunta{
+    font-size:20px;
+    line-height:1.5;
+    font-weight:bold;
+    margin-bottom:25px;
+}
+.opcao{
+    border:2px solid #d9dee7;
+    border-radius:12px;
+    padding:16px;
+    margin:12px 0;
+    cursor:pointer;
+    font-size:18px;
+}
+.opcao:hover{background:#f5f7fa}
+.opcao.selecionada{
+    border-color:#1d4ed8;
+    background:#eef4ff;
+}
+button{
+    width:100%;
+    border:0;
+    border-radius:12px;
+    padding:16px;
+    margin-top:20px;
+    background:#1d4ed8;
+    color:white;
+    font-size:17px;
+    font-weight:bold;
+    cursor:pointer;
+}
+button:disabled{
+    background:#9ca3af;
+    cursor:not-allowed;
+}
+.progresso{
+    height:8px;
+    background:#e5e7eb;
+    border-radius:20px;
+    overflow:hidden;
+    margin-bottom:22px;
+}
+.barra{
+    height:100%;
+    background:#1d4ed8;
+    width:0%;
+}
+.resultado{text-align:center}
+.resultado h2{font-size:30px;margin-bottom:8px}
+.nota{
+    font-size:50px;
+    font-weight:bold;
+    margin:15px 0;
+}
+.aprovado{color:#15803d}
+.reprovado{color:#b91c1c}
+.aviso{
+    background:#fff7ed;
+    padding:12px;
+    border-radius:10px;
+    margin-top:20px;
+    font-size:14px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="topo">
+    <h1>SIMULADO PMMA 2026</h1>
+    <p>Soldado • 60 itens • Certo ou Errado</p>
+</div>
+
+<div class="container">
+<div class="card" id="quiz">
+
+<div class="progresso">
+    <div class="barra" id="barra"></div>
+</div>
+
+<div class="info">
+    <span id="numero">Questão 1 de 60</span>
+    <span id="respondidas">Respondidas: 0</span>
+</div>
+
+<div class="materia" id="materia"></div>
+<div class="pergunta" id="pergunta"></div>
+
+<div class="opcao" id="certo" onclick="selecionar('C')">
+    ○ CERTO
+</div>
+
+<div class="opcao" id="errado" onclick="selecionar('E')">
+    ○ ERRADO
+</div>
+
+<button id="proximo" onclick="proxima()" disabled>
+    PRÓXIMA QUESTÃO
+</button>
+
+</div>
+</div>
+
+<script>
+const questoes = [
+["Português","Na frase “Os policiais chegaram cedo”, a palavra “policiais” está empregada no plural.","C"],
+["Português","O ponto de interrogação é normalmente empregado ao final de uma pergunta direta.","C"],
+["Português","Na frase “Maria estudou para a prova”, a palavra “Maria” é um nome próprio.","C"],
+["Português","A palavra “feliz” pode funcionar como adjetivo ao indicar uma característica.","C"],
+["Português","A forma “caza”, quando significa residência, está de acordo com a ortografia oficial.","E"],
+["Português","Um texto coerente apresenta ideias que mantêm relação de sentido entre si.","C"],
+["Português","Na frase “Eles estudam diariamente”, o verbo está empregado no plural.","C"],
+["Português","A vírgula e o ponto final são sinais de pontuação.","C"],
+
+["Raciocínio Lógico","Se todo policial é servidor público e Carlos é policial, então, pelas informações apresentadas, Carlos é servidor público.","C"],
+["Raciocínio Lógico","Uma proposição lógica pode assumir valor verdadeiro ou falso.","C"],
+["Raciocínio Lógico","Se Ana é mais velha que Beatriz e Beatriz é mais velha que Carla, então Ana é mais velha que Carla.","C"],
+["Raciocínio Lógico","A negação de uma proposição verdadeira também será necessariamente verdadeira.","E"],
+["Raciocínio Lógico","Na proposição “João estuda e Maria trabalha”, a palavra “e” funciona como conectivo lógico.","C"],
+["Raciocínio Lógico","A afirmação “São Luís é a capital do Maranhão” possui valor lógico verdadeiro.","C"],
+["Raciocínio Lógico","Duas proposições ligadas pelo conectivo “e” formam uma proposição composta.","C"],
+["Raciocínio Lógico","Uma proposição pode ser verdadeira e falsa ao mesmo tempo, no mesmo sentido.","E"],
+
+["História do Brasil","Os povos indígenas já habitavam o território brasileiro antes da chegada dos portugueses.","C"],
+["História do Brasil","A população negra teve importante participação na formação histórica e cultural brasileira.","C"],
+["História do Brasil","Getúlio Vargas exerceu a Presidência da República no Brasil.","C"],
+["História do Brasil","Juscelino Kubitschek, conhecido como JK, foi presidente do Brasil.","C"],
+["História do Brasil","Brasília foi inaugurada durante o governo de Juscelino Kubitschek.","C"],
+["História do Brasil","O regime militar brasileiro teve início em 1964.","C"],
+["História do Brasil","A redemocratização brasileira ocorreu após o período do regime militar.","C"],
+["História do Brasil","A produção de café não teve qualquer importância para a economia brasileira.","E"],
+
+["História do Maranhão","Daniel de La Touche está relacionado à presença francesa no Maranhão.","C"],
+["História do Maranhão","A França Equinocial está relacionada à história da presença francesa no Maranhão.","C"],
+["História do Maranhão","A Batalha de Guaxenduba faz parte da história do Maranhão.","C"],
+["História do Maranhão","A Revolta de Beckman ocorreu no Maranhão.","C"],
+["História do Maranhão","A Balaiada teve o Maranhão como uma de suas principais áreas de ocorrência.","C"],
+["História do Maranhão","O território maranhense nunca sofreu ocupação holandesa.","E"],
+["História do Maranhão","São Luís foi fundada no contexto da presença francesa no Maranhão no século XVII.","C"],
+
+["Geografia do Brasil","O território brasileiro está localizado na América do Sul.","C"],
+["Geografia do Brasil","O Brasil é formado por 26 estados e pelo Distrito Federal.","C"],
+["Geografia do Brasil","Brasília é a capital federal do Brasil.","C"],
+["Geografia do Brasil","A agricultura faz parte das atividades econômicas desenvolvidas no Brasil.","C"],
+["Geografia do Brasil","O território brasileiro apresenta áreas urbanas e rurais.","C"],
+["Geografia do Brasil","A Amazônia ocupa parte do território brasileiro.","C"],
+["Geografia do Brasil","O Brasil não possui atividade industrial.","E"],
+
+["Geografia do Maranhão","O Maranhão integra a Região Nordeste do Brasil.","C"],
+["Geografia do Maranhão","São Luís é a capital do estado do Maranhão.","C"],
+["Geografia do Maranhão","O estado do Maranhão possui litoral voltado para o oceano Atlântico.","C"],
+["Geografia do Maranhão","Existem rios no território maranhense.","C"],
+["Geografia do Maranhão","O Parque Nacional dos Lençóis Maranhenses está localizado no Maranhão.","C"],
+["Geografia do Maranhão","Agricultura e indústria são atividades econômicas existentes no Maranhão.","C"],
+["Geografia do Maranhão","O Maranhão não faz parte do território brasileiro.","E"],
+
+["Legislação PMMA","A sigla PMMA corresponde a Polícia Militar do Maranhão.","C"],
+["Legislação PMMA","A Lei Estadual nº 6.513/1995 dispõe sobre o Estatuto dos Policiais Militares da Polícia Militar do Maranhão.","C"],
+["Legislação PMMA","A Lei Federal nº 14.751/2023 instituiu a Lei Orgânica Nacional das Polícias Militares e dos Corpos de Bombeiros Militares.","C"],
+["Legislação PMMA","O Estatuto dos Policiais Militares do Maranhão contém normas relacionadas à vida funcional dos policiais militares.","C"],
+["Legislação PMMA","O policial militar está dispensado do cumprimento de deveres previstos nas normas da instituição.","E"],
+["Legislação PMMA","A Polícia Militar do Maranhão integra a estrutura de segurança pública estadual.","C"],
+["Legislação PMMA","A legislação institucional estabelece regras aplicáveis aos integrantes da Polícia Militar.","C"],
+
+["Informática","Windows é um sistema operacional utilizado em computadores.","C"],
+["Informática","Linux é também um sistema operacional.","C"],
+["Informática","O Microsoft Word é um programa utilizado principalmente para edição de textos.","C"],
+["Informática","Planilhas eletrônicas podem ser utilizadas para organizar dados e realizar cálculos.","C"],
+["Informática","Um navegador de Internet permite acessar páginas disponíveis na web.","C"],
+["Informática","Programas antivírus podem auxiliar na proteção contra softwares maliciosos.","C"],
+["Informática","Backup é uma cópia de segurança de dados.","C"],
+["Informática","A senha “123456” é considerada, em regra, uma senha forte e recomendada para proteger contas.","E"]
+];
+
+let atual = 0;
+let respostas = [];
+let selecionada = null;
+
+function carregar(){
+    document.getElementById("numero").innerText =
+        "Questão " + (atual+1) + " de " + questoes.length;
+
+    document.getElementById("respondidas").innerText =
+        "Respondidas: " + respostas.length;
+
+    document.getElementById("materia").innerText = questoes[atual][0];
+    document.getElementById("pergunta").innerText = questoes[atual][1];
+
+    document.getElementById("barra").style.width =
+        ((atual)/questoes.length*100) + "%";
+
+    document.getElementById("certo").className="opcao";
+    document.getElementById("errado").className="opcao";
+
+    document.getElementById("certo").innerHTML="○ CERTO";
+    document.getElementById("errado").innerHTML="○ ERRADO";
+
+    selecionada=null;
+    document.getElementById("proximo").disabled=true;
+
+    if(atual === questoes.length-1){
+        document.getElementById("proximo").innerText="FINALIZAR SIMULADO";
+    }
+}
+
+function selecionar(resp){
+    selecionada=resp;
+
+    document.getElementById("certo").className="opcao";
+    document.getElementById("errado").className="opcao";
+
+    document.getElementById("certo").innerHTML="○ CERTO";
+    document.getElementById("errado").innerHTML="○ ERRADO";
+
+    if(resp==="C"){
+        document.getElementById("certo").classList.add("selecionada");
+        document.getElementById("certo").innerHTML="● CERTO";
+    }else{
+        document.getElementById("errado").classList.add("selecionada");
+        document.getElementById("errado").innerHTML="● ERRADO";
+    }
+
+    document.getElementById("proximo").disabled=false;
+}
+
+function proxima(){
+    if(!selecionada) return;
+
+    respostas.push(selecionada);
+
+    if(atual < questoes.length-1){
+        atual++;
+        carregar();
+    }else{
+        finalizar();
+    }
+}
+
+function finalizar(){
+    let acertos=0;
+
+    for(let i=0;i<questoes.length;i++){
+        if(respostas[i]===questoes[i][2]){
+            acertos++;
+        }
+    }
+
+    const aprovado = acertos >= 35;
+
+    document.getElementById("quiz").innerHTML = `
+        <div class="resultado">
+            <h2>RESULTADO FINAL</h2>
+            <p>Você acertou</p>
+
+            <div class="nota ${aprovado ? "aprovado":"reprovado"}">
+                ${acertos}/60
+            </div>
+
+            <h2 class="${aprovado ? "aprovado":"reprovado"}">
+                ${aprovado ? "APROVADO ✅":"REPROVADO ❌"}
+            </h2>
+
+            <p>
+                ${aprovado
+                ? "Parabéns! Você atingiu a pontuação mínima estabelecida para este simulado."
+                : "Você não atingiu os 35 acertos necessários para aprovação neste simulado."}
+            </p>
+
+            <div class="aviso">
+                Critério deste simulado: mínimo de 35 acertos em 60 questões.
+            </div>
+
+            <button onclick="location.reload()">
+                FAZER NOVAMENTE
+            </button>
+        </div>
+    `;
+}
+
+carregar();
+</script>
+
+</body>
+</html>
